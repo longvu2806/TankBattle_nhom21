@@ -26,7 +26,18 @@ public abstract class BaseTank : MonoBehaviour
     public virtual void TakeDamage(int damage)
     {
         currentHealth -= damage;
-        Debug.Log(gameObject.name + " còn lại máu: " + currentHealth);
+        // Debug.Log(gameObject.name + " còn: " + currentHealth + " máu.");
+
+        // --- ĐOẠN MỚI: CẬP NHẬT UI ---
+        // Chỉ cập nhật UI nếu đây là Player (xe người chơi)
+        if (gameObject.CompareTag("Player"))
+        {
+            if (UIManager.Instance != null)
+            {
+                UIManager.Instance.UpdateHealthUI(currentHealth);
+            }
+        }
+        // -----------------------------
 
         if (currentHealth <= 0)
         {
