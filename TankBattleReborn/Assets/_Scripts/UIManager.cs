@@ -28,8 +28,9 @@ public class UIManager : MonoBehaviour
 
     void Start()
     {
+        Time.timeScale = 1; // Đảm bảo thời gian chạy bình thường khi vào game
         // Mặc định khi chạy game thì hiện Menu, tắt mấy cái kia
-        ShowPanel("Menu");
+        //ShowPanel("Menu");
     }
 
     // Hàm chức năng: Bật panel này, tắt panel kia
