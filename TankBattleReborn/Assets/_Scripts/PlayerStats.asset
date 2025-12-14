@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: PlayerStats
   m_EditorClassIdentifier: 
   tankName: 
-  moveSpeed: 5
+  moveSpeed: 10
   rotateSpeed: 150
   health: 100
   damage: 10
