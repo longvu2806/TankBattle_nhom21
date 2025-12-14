@@ -14,6 +14,11 @@ public class TankController : BaseTank
 
         // Gán tag để đạn địch nhận diện
         gameObject.tag = "Player";
+        // Cập nhật UI ngay khi vào game để hiển thị đúng 100/100
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.UpdateHealthUI((int)currentHealth, (int)maxHealth);
+        }
     }
 
     void Update()
@@ -57,10 +62,16 @@ public class TankController : BaseTank
     }
 
     // Ghi đè hàm chết: Player chết thì báo Game Over
+    // Ghi đè hàm Die của cha (BaseTank)
     protected override void Die()
     {
-        Debug.Log("PLAYER DEAD -> GAME OVER");
-        GameManager.Instance.TriggerGameOver();
-        gameObject.SetActive(false); // Ẩn đi chứ không xóa để script còn chạy
+        // 1. Gọi ông trọng tài báo Game Over
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.GameOver();
+        }
+
+        // 2. Sau đó mới gọi lệnh hủy xe của cha
+        base.Die();
     }
 }

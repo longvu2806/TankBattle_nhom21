@@ -11,6 +11,8 @@ public class UIManager : MonoBehaviour
     public GameObject gamePanel;
     public GameObject gameOverPanel;
     public GameObject shopPanel;
+    public GameObject victoryPanel;
+
 
     [Header("Các dòng chữ thông số (HUD)")]
     public TextMeshProUGUI healthText; // Hiển thị máu
@@ -42,6 +44,7 @@ public class UIManager : MonoBehaviour
         if (gameOverPanel) gameOverPanel.SetActive(false);
         if (shopPanel) shopPanel.SetActive(false);
 
+
         // 2. Bật cái cần thiết lên
         switch (panelName)
         {
@@ -63,15 +66,27 @@ public class UIManager : MonoBehaviour
                 if (gameOverPanel) gameOverPanel.SetActive(true);
                 // Không dừng thời gian ở đây để còn xem hiệu ứng nổ
                 break;
+            case "Victory":
+                if (victoryPanel) victoryPanel.SetActive(true);
+                break;
         }
     }
 
+
     // Hàm cập nhật máu trên màn hình
-    public void UpdateHealthUI(int currentHealth)
+    public void UpdateHealthUI(int currentHealth, int maxHealth)
     {
         if (healthText != null)
         {
-            healthText.text = "HP: " + currentHealth;
+            // Hiển thị dạng "HP: 80 / 100"
+            healthText.text = "HP: " + currentHealth + " / " + maxHealth;
+        }
+    }
+    public void UpdateScoreUI(int score)
+    {
+        if (scoreText != null)
+        {
+            scoreText.text = "Score: " + score;
         }
     }
 }

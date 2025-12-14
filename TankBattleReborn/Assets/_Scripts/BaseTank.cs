@@ -34,7 +34,7 @@ public abstract class BaseTank : MonoBehaviour
         {
             if (UIManager.Instance != null)
             {
-                UIManager.Instance.UpdateHealthUI(currentHealth);
+                UIManager.Instance.UpdateHealthUI(currentHealth,maxHealth);
             }
         }
         // -----------------------------
@@ -57,7 +57,8 @@ public abstract class BaseTank : MonoBehaviour
     // Hàm chết (Mỗi thằng chết một kiểu nên để abstract hoặc virtual)
     protected virtual void Die()
     {
-        // Mặc định là hủy object
+        // Chỉ đơn giản là hủy object, không gọi UI gì cả
+        Debug.Log(gameObject.name + " đã bị tiêu diệt!");
         Destroy(gameObject);
     }
 }
