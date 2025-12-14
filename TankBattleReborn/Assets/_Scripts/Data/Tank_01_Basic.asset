@@ -10,10 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 394f3d012aa74dd40ab133249ea06be1, type: 3}
-  m_Name: PlayerStats
+  m_Name: Tank_01_Basic
   m_EditorClassIdentifier: 
-  tankName: 
-  moveSpeed: 10
-  rotateSpeed: 150
+  id: 0
+  tankName: "T\u0103ng c\u01A1 b\u1EA3n"
+  price: 0
+  icon: {fileID: 21300000, guid: a60f127682f3f774c974a9819e731a35, type: 3}
   health: 100
-  damage: 10
+  moveSpeed: 0
+  tankPrefab: {fileID: 7978139916434192523, guid: 94da4c14054e21647b41468dabed8488, type: 3}
+  isUnlocked: 1

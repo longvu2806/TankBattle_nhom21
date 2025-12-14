@@ -58,6 +58,18 @@ public class EnemyAI : BaseTank
             rb.velocity = Vector2.zero;
         }
     }
+    // Ghi đè hàm Die của cha (BaseTank)
+    protected override void Die()
+    {
+        // 1. Quan trọng nhất: Báo cho GameManager biết "Tôi đã chết, hãy trừ tôi đi!"
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.EnemyDied();
+        }
+
+        // 2. Sau đó mới gọi lệnh nổ và biến mất của cha
+        base.Die();
+    }
 
     // Enemy chết thì chỉ cần nổ (Logic mặc định của cha là Destroy)
     // Không cần override Die() nếu không muốn làm gì đặc biệt
