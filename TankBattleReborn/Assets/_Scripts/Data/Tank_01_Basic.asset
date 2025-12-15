@@ -16,7 +16,8 @@ MonoBehaviour:
   tankName: "T\u0103ng c\u01A1 b\u1EA3n"
   price: 0
   icon: {fileID: 21300000, guid: a60f127682f3f774c974a9819e731a35, type: 3}
+  turnSpeed: 360
   health: 100
-  moveSpeed: 0
+  moveSpeed: 5
   tankPrefab: {fileID: 7978139916434192523, guid: 94da4c14054e21647b41468dabed8488, type: 3}
   isUnlocked: 1
