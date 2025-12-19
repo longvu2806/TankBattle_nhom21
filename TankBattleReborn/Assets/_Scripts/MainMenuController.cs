@@ -1,19 +1,32 @@
 ﻿using UnityEngine;
-using UnityEngine.SceneManagement; // Bắt buộc có dòng này để chuyển cảnh
+using UnityEngine.SceneManagement; // Thư viện quản lý Scene
 
-public class MainMenuController : MonoBehaviour
+public class MainMenuUI : MonoBehaviour
 {
-    // Hàm này dùng cho nút START
-    public void PlayGame()
+    [Header("UI Panels")]
+    public GameObject loginPanel; // Kéo Login_Screen vào đây
+    public GameObject menuPanel;  // Kéo Main_Menu vào đây
+    public GameObject shopPanel;  // (Để dành làm sau)
+
+    // --- LOGIC LOGIN ---
+    public void OnClick_Launch()
     {
-        // Khi bấm Start, máy sẽ tải Scene số 1 trong danh sách (Scene Game)
-        SceneManager.LoadScene(1);
+        // Khi bấm nút LAUNCH ở màn hình Login
+        // Tắt Login, Bật Menu
+        loginPanel.SetActive(false);
+        menuPanel.SetActive(true);
     }
 
-    // Hàm này dùng cho nút EXIT
-    public void QuitGame()
+    // --- LOGIC MENU ---
+    public void OnClick_StartGame()
     {
-        Debug.Log("Đã thoát game!"); // Hiện thông báo kiểm tra
+        // Chuyển sang màn chơi chính
+        SceneManager.LoadScene("GamePlay");
+    }
+
+    public void OnClick_Exit()
+    {
+        Debug.Log("Thoát Game");
         Application.Quit();
     }
 }
