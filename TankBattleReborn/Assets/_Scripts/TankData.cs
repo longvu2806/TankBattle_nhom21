@@ -9,6 +9,7 @@ public class TankData : ScriptableObject
     public string tankName;     // Tên xe (Ví dụ: "Xe Tăng Cọp")
     public int price;           // Giá tiền
     public Sprite icon;         // Hình ảnh hiển thị trong Shop
+    public float turnSpeed;
 
     [Header("Thông số kỹ thuật")]
     public int health;          // Máu

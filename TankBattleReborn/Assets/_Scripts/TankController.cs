@@ -1,10 +1,13 @@
 using UnityEngine;
 
-// Kế thừa từ BaseTank thay vì MonoBehaviour
+// Kế thừa từ BaseTank
 public class TankController : BaseTank
 {
     private Vector2 moveInput;
     private Camera mainCam;
+
+    [Header("Movement Settings")]
+    public float turnSpeed = 200f; // Tốc độ xoay (độ/giây). Bạn chỉnh số này trong Inspector nếu muốn xoay nhanh hơn
 
     // override: Ghi đè hàm Start của cha
     protected override void Start()
@@ -14,7 +17,8 @@ public class TankController : BaseTank
 
         // Gán tag để đạn địch nhận diện
         gameObject.tag = "Player";
-        // Cập nhật UI ngay khi vào game để hiển thị đúng 100/100
+
+        // Cập nhật UI ngay khi vào game
         if (UIManager.Instance != null)
         {
             UIManager.Instance.UpdateHealthUI((int)currentHealth, (int)maxHealth);
@@ -39,14 +43,44 @@ public class TankController : BaseTank
 
     void FixedUpdate()
     {
-        // Di chuyển
-        rb.velocity = moveInput.normalized * moveSpeed;
+        // --- PHẦN SỬA ĐỔI: XOAY 360 ĐỘ ---
 
-        // Xoay thân xe
         if (moveInput != Vector2.zero)
         {
-            float angle = Mathf.Atan2(moveInput.y, moveInput.x) * Mathf.Rad2Deg;
-            rb.rotation = angle - 90;
+            // 1. Di chuyển xe
+            rb.velocity = moveInput.normalized * moveSpeed;
+
+            // 2. Tính góc cần xoay tới (360 độ)
+            float targetAngle = Mathf.Atan2(moveInput.y, moveInput.x) * Mathf.Rad2Deg;
+            targetAngle -= 90; // Trừ 90 độ cho khớp với Sprite hướng lên
+
+            // 3. Xoay từ từ (Smooth) thay vì gán trực tiếp
+            Quaternion targetRotation = Quaternion.Euler(0, 0, targetAngle);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, turnSpeed * Time.fixedDeltaTime);
+        }
+        else
+        {
+            // Dừng xe khi không bấm phím
+            rb.velocity = Vector2.zero;
+        }
+    }
+
+    public void SetupTank(TankData data)
+    {
+        // Gán chỉ số từ Data vào biến của xe
+        maxHealth = data.health; // Lưu ý: Trong Data bạn đặt tên là maxHealth hay health thì sửa lại cho khớp nhé
+        currentHealth = maxHealth;
+        moveSpeed = data.moveSpeed;
+
+        // Nếu trong file TankData của bạn đã thêm biến turnSpeed thì bỏ comment dòng dưới để lấy từ data
+        // turnSpeed = data.turnSpeed; 
+
+        // (Nếu xe bạn có biến damage thì gán luôn: damage = data.damage)
+
+        // Cập nhật lại UI ngay lập tức
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.UpdateHealthUI((int)currentHealth, (int)maxHealth);
         }
     }
 
@@ -61,7 +95,6 @@ public class TankController : BaseTank
         }
     }
 
-    // Ghi đè hàm chết: Player chết thì báo Game Over
     // Ghi đè hàm Die của cha (BaseTank)
     protected override void Die()
     {
