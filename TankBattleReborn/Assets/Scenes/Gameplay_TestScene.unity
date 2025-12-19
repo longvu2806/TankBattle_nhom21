@@ -1503,7 +1503,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentCoin: 1000
   ownedTankIds: 01000000
-  equippedTankId: 1
+  equippedTankId: 0
 --- !u!4 &1793457665
 Transform:
   m_ObjectHideFlags: 0
