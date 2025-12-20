@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 394f3d012aa74dd40ab133249ea06be1, type: 3}
+  m_Name: Tank_1_Basic
+  m_EditorClassIdentifier: 
+  id: 11
+  tankName: Titan Tank
+  price: 500
+  icon: {fileID: 21300000, guid: d6ed605f268a5c04e988fa0c7b353c5f, type: 3}
+  turnSpeed: 150
+  description: super xayda
+  tankPreview: {fileID: 21300000, guid: c5edc3654ad34b644856318d921570a9, type: 3}
+  health: 100
+  moveSpeed: 20
+  damage: 20
+  tankPrefab: {fileID: 0}
+  isUnlocked: 0
+  rarityLevel: 0
