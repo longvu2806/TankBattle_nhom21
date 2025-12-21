@@ -6,6 +6,11 @@ public class GameManager : MonoBehaviour
     // 1. Singleton
     public static GameManager Instance;
 
+    // --- [MỚI] DATA SYSTEM ---
+    [Header("Dữ liệu Người chơi (JSON)")]
+    public PlayerData playerData; // Biến này chứa Tiền, Level, Danh sách xe
+    // -------------------------
+
     public bool IsGameOver = false;
 
     // --- PHẦN CỦA BẠN B: Biến đếm số địch ---
@@ -13,44 +18,53 @@ public class GameManager : MonoBehaviour
     public int enemyCount = 0;
 
     [Header("Điểm số")]
-    public int score = 0; // Biến lưu điểm (100 điểm = 100 vàng)
+    public int score = 0;
 
     private void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
+            DontDestroyOnLoad(gameObject); // [QUAN TRỌNG] Giữ GameManager sống qua các màn
         }
         else
         {
             Destroy(gameObject);
+            return; // Thoát luôn để tránh lỗi logic bên dưới
         }
+
+        // --- [MỚI] LOAD DỮ LIỆU TỪ FILE JSON ---
+        playerData = SaveSystem.Load();
+        Debug.Log($"Game khởi động. Tài sản hiện có: {playerData.gold} Gold");
     }
 
     // --- LOGIC CỦA BẠN B: Đăng ký địch sinh ra từ Spawner ---
     public void RegisterEnemy()
     {
-        enemyCount++; // Tăng số lượng địch lên 1
-        Debug.Log("Địch mới xuất hiện! Tổng: " + enemyCount);
+        enemyCount++;
+        // Debug.Log("Địch mới xuất hiện! Tổng: " + enemyCount);
     }
 
     // --- LOGIC CỦA BẠN B: Đếm số địch có sẵn lúc bắt đầu ---
     void Start()
     {
-        // Tìm tất cả GameObject có Tag là "Enemy"
+        // Reset trạng thái game
+        IsGameOver = false;
+        Time.timeScale = 1;
+        score = 0; // Reset điểm về 0 khi chơi mới
+
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
         enemyCount = enemies.Length;
-
-        Debug.Log("Bắt đầu game với: " + enemyCount + " kẻ địch.");
+        // Debug.Log("Bắt đầu game với: " + enemyCount + " kẻ địch.");
     }
 
     // --- LOGIC CỦA BẠN B: Xử lý khi địch chết ---
     public void EnemyDied()
     {
-        enemyCount--; // Trừ đi 1 tên
-        Debug.Log("Địch chết! Còn lại: " + enemyCount);
+        enemyCount--;
+        // Debug.Log("Địch chết! Còn lại: " + enemyCount);
 
-        score += 100; // Cộng 100 điểm mỗi khi giết 1 tên
+        score += 100; // Cộng điểm (tạm thời chưa lưu, chết/thắng mới đổi thành tiền)
 
         if (UIManager.Instance != null)
         {
@@ -68,20 +82,21 @@ public class GameManager : MonoBehaviour
     public void GameOver()
     {
         if (IsGameOver) return;
-        IsGameOver = true;
+        IsGameOver = false;
         Debug.Log("Game Over!");
 
         Time.timeScale = 0; // Dừng game
 
         // ================================================================
-        // [MỚI] TRẢ LƯƠNG AN ỦI KHI THUA
-        // Logic: Bắn được bao nhiêu điểm thì nhận bấy nhiêu tiền
+        // [NÂNG CẤP] LƯU DỮ LIỆU XUỐNG JSON
         // ================================================================
-        if (InventoryManager.Instance != null)
-        {
-            InventoryManager.Instance.AddCoin(score);
-            Debug.Log($"Thua cuộc! Nhận tiền an ủi: {score}");
-        }
+        // Cộng tiền an ủi vào kho dữ liệu chính
+        playerData.gold += score;
+
+        // GỌI LỆNH LƯU NGAY LẬP TỨC
+        SaveGame();
+
+        Debug.Log($"Thua cuộc! Đã lưu thêm {score} vàng vào ví. Tổng: {playerData.gold}");
         // ================================================================
 
         if (UIManager.Instance != null)
@@ -93,24 +108,25 @@ public class GameManager : MonoBehaviour
     // --- HÀM XỬ LÝ VICTORY (THẮNG) ---
     public void Victory()
     {
-        if (IsGameOver) return; // Nếu đã thắng/thua rồi thì thôi
+        if (IsGameOver) return;
         IsGameOver = true;
 
         Debug.Log("VICTORY! Bạn đã thắng.");
         Time.timeScale = 0;
 
         // ================================================================
-        // [MỚI] TRẢ LƯƠNG CHIẾN THẮNG
-        // Logic: Nhận toàn bộ điểm Score + Thưởng nóng 500 vàng
+        // [NÂNG CẤP] LƯU DỮ LIỆU XUỐNG JSON
         // ================================================================
-        if (InventoryManager.Instance != null)
-        {
-            int bonusReward = 500;
-            int totalGold = score + bonusReward;
+        int bonusReward = 500;
+        int totalGold = score + bonusReward;
 
-            InventoryManager.Instance.AddCoin(totalGold);
-            Debug.Log($"Chiến thắng! Tổng tiền nhận: {totalGold} (Score: {score} + Thưởng: {bonusReward})");
-        }
+        // Cộng tiền vào Data
+        playerData.gold += totalGold;
+
+        // GỌI LỆNH LƯU NGAY LẬP TỨC
+        SaveGame();
+
+        Debug.Log($"Chiến thắng! Đã lưu {totalGold} vàng. Tổng ví: {playerData.gold}");
         // ================================================================
 
         // Gọi UI hiện bảng Victory
@@ -124,5 +140,19 @@ public class GameManager : MonoBehaviour
     {
         Time.timeScale = 1;
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    // --- [MỚI] HÀM TIỆN ÍCH CHO SHOP & SAVE ---
+
+    // Gọi hàm này để lưu game bất cứ lúc nào
+    public void SaveGame()
+    {
+        SaveSystem.Save(playerData);
+    }
+
+    // Tự động lưu khi tắt game (để chắc ăn)
+    private void OnApplicationQuit()
+    {
+        SaveGame();
     }
 }
