@@ -19,6 +19,10 @@ public class EnemyAI : BaseTank
 
         // Gán tag
         gameObject.tag = "Enemy";
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.RegisterEnemy();
+        }
     }
 
     void Update()

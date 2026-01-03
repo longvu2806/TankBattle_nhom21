@@ -1,88 +1,91 @@
 using UnityEngine;
 
-// Kế thừa từ BaseTank
 public class TankController : BaseTank
 {
     private Vector2 moveInput;
     private Camera mainCam;
+    private Vector2 currentVelocity; // Biến dùng để tính toán độ trượt
 
-    [Header("Movement Settings")]
-    public float turnSpeed = 200f; // Tốc độ xoay (độ/giây). Bạn chỉnh số này trong Inspector nếu muốn xoay nhanh hơn
+    [Header("Cảm giác lái (Game Feel)")]
+    public float turnSpeed = 200f;
+    public float fireRate = 0.5f;
 
-    // override: Ghi đè hàm Start của cha
+    [Header("Độ đầm của xe (Càng nhỏ càng trượt nhiều)")]
+    public float acceleration = 10f; // Tăng tốc độ này để xe bốc hơn
+    public float deceleration = 10f; // Giảm tốc độ này để xe phanh gấp hơn
+    public int damage = 10;
+    private float nextFireTime = 0f;
+
     protected override void Start()
     {
-        base.Start(); // Gọi logic của cha (lấy Rigidbody, set máu)
+        base.Start();
         mainCam = Camera.main;
-
-        // Gán tag để đạn địch nhận diện
         gameObject.tag = "Player";
-
-        // Cập nhật UI ngay khi vào game
-        if (UIManager.Instance != null)
-        {
-            UIManager.Instance.UpdateHealthUI((int)currentHealth, (int)maxHealth);
-        }
     }
 
     void Update()
     {
-        // 1. Input di chuyển
+        // 1. Input
         moveInput.x = Input.GetAxisRaw("Horizontal");
         moveInput.y = Input.GetAxisRaw("Vertical");
+        moveInput.Normalize(); // Chống đi chéo nhanh hơn đi thẳng
 
-        // 2. Xoay súng theo chuột
         RotateGunToMouse();
 
-        // 3. Bắn (Gọi hàm Shoot của cha)
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButton(0) && Time.time >= nextFireTime)
         {
             Shoot();
+            nextFireTime = Time.time + fireRate;
         }
     }
 
     void FixedUpdate()
     {
-        // --- PHẦN SỬA ĐỔI: XOAY 360 ĐỘ ---
-
-        if (moveInput != Vector2.zero)
+        // --- LOGIC DI CHUYỂN MỚI (CÓ QUÁN TÍNH) ---
+        if (moveInput.magnitude > 0)
         {
-            // 1. Di chuyển xe
-            rb.velocity = moveInput.normalized * moveSpeed;
-
-            // 2. Tính góc cần xoay tới (360 độ)
-            float targetAngle = Mathf.Atan2(moveInput.y, moveInput.x) * Mathf.Rad2Deg;
-            targetAngle -= 90; // Trừ 90 độ cho khớp với Sprite hướng lên
-
-            // 3. Xoay từ từ (Smooth) thay vì gán trực tiếp
-            Quaternion targetRotation = Quaternion.Euler(0, 0, targetAngle);
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, turnSpeed * Time.fixedDeltaTime);
+            // Đang bấm phím -> Tăng tốc từ từ
+            currentVelocity = Vector2.MoveTowards(currentVelocity, moveInput * moveSpeed, acceleration * Time.fixedDeltaTime);
         }
         else
         {
-            // Dừng xe khi không bấm phím
-            rb.velocity = Vector2.zero;
+            // Nhả phím -> Giảm tốc từ từ (Trôi nhẹ)
+            currentVelocity = Vector2.MoveTowards(currentVelocity, Vector2.zero, deceleration * Time.fixedDeltaTime);
         }
-    }
 
-    public void SetupTank(TankData data)
-    {
-        // Gán chỉ số từ Data vào biến của xe
-        maxHealth = data.health; // Lưu ý: Trong Data bạn đặt tên là maxHealth hay health thì sửa lại cho khớp nhé
-        currentHealth = maxHealth;
-        moveSpeed = data.moveSpeed;
+        rb.velocity = currentVelocity;
 
-        // Nếu trong file TankData của bạn đã thêm biến turnSpeed thì bỏ comment dòng dưới để lấy từ data
-        // turnSpeed = data.turnSpeed; 
-
-        // (Nếu xe bạn có biến damage thì gán luôn: damage = data.damage)
-
-        // Cập nhật lại UI ngay lập tức
-        if (UIManager.Instance != null)
+        // --- LOGIC XOAY THÂN XE (GIỮ NGUYÊN VÌ ĐÃ TỐT) ---
+        if (moveInput != Vector2.zero)
         {
-            UIManager.Instance.UpdateHealthUI((int)currentHealth, (int)maxHealth);
+            float targetAngle = Mathf.Atan2(moveInput.y, moveInput.x) * Mathf.Rad2Deg;
+            targetAngle -= 90;
+            Quaternion targetRotation = Quaternion.Euler(0, 0, targetAngle);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, turnSpeed * Time.fixedDeltaTime);
         }
     }
+
+    public void SetupTank(ItemData data)
+    {
+        if (data == null) return;
+
+        // 1. Nạp chỉ số RPG
+        this.maxHealth = data.healthBonus;
+        this.currentHealth = this.maxHealth; // Hồi đầy máu khi sinh ra
+
+        // 2. Nạp chỉ số Vật Lý (Đây là phần Cách 2)
+        // Kiểm tra > 0 để tránh trường hợp bạn quên nhập liệu làm xe đứng im
+        if (data.moveSpeed > 0) this.moveSpeed = data.moveSpeed;
+        if (data.turnSpeed > 0) this.turnSpeed = data.turnSpeed;
+        if (data.acceleration > 0) this.acceleration = data.acceleration;
+
+        // Nếu xe bạn có script bắn súng riêng (VD: ShootingController), 
+        // bạn có thể gọi nó để cập nhật Damage tại đây luôn:
+        this.damage = data.damageBonus;
+
+        Debug.Log($"Đã setup xe {data.itemName}: Speed={moveSpeed}, Accel={acceleration}");
+    }
+
 
     void RotateGunToMouse()
     {
@@ -94,17 +97,15 @@ public class TankController : BaseTank
             gunTurret.rotation = Quaternion.Euler(0, 0, angle - 90);
         }
     }
-
-    // Ghi đè hàm Die của cha (BaseTank)
     protected override void Die()
     {
-        // 1. Gọi ông trọng tài báo Game Over
+        // 1. Gọi GameManager xử lý THUA
         if (GameManager.Instance != null)
         {
             GameManager.Instance.GameOver();
         }
 
-        // 2. Sau đó mới gọi lệnh hủy xe của cha
+        // 2. Gọi hiệu ứng nổ và hủy object (từ class cha BaseTank)
         base.Die();
     }
 }

@@ -2,62 +2,101 @@ using UnityEngine;
 
 public class PlayerSpawner : MonoBehaviour
 {
-    public Transform spawnPoint; // Vị trí sẽ sinh xe
+    [Header("--- CÀI ĐẶT ---")]
+    public Transform spawnPoint; // Kéo vị trí StartPoint vào đây
 
     void Start()
     {
-        // Khi game vừa chạy là sinh xe ngay
-        SpawnTank();
+        SpawnPlayer();
     }
 
-    void SpawnTank()
+    void SpawnPlayer()
     {
-        // 1. Lấy ID xe đang chọn (Mặc định là 0 nếu không tìm thấy Manager)
-        int tankId = 0;
-        if (InventoryManager.Instance != null)
+        // 0. KIỂM TRA AN TOÀN
+        if (InventoryManager.Instance == null)
         {
-            tankId = InventoryManager.Instance.equippedTankId;
+            Debug.LogError("Thiếu InventoryManager trong Scene!");
+            return;
         }
 
-        // 2. Tìm dữ liệu xe trong Shop dựa trên ID
-        TankData data = null;
-        if (ShopManager.Instance != null)
+        // 1. LẤY ID TỪ KHO ĐỒ (ID xe và ID súng đang dùng)
+        string hullID = InventoryManager.Instance.equippedTankId;
+
+        // Nếu chưa có biến equippedWeaponId trong InventoryManager, hãy tạm thời dùng cứng "gun_01"
+        // Hoặc thêm biến đó vào InventoryManager theo hướng dẫn trước
+        string weaponID = InventoryManager.Instance.equippedWeaponId;
+        if (string.IsNullOrEmpty(weaponID)) weaponID = "gun_01"; // Fallback nếu quên set
+
+        // 2. TÌM DATA ITEM (Dựa vào ID)
+        ItemData hullData = FindItemData(hullID);
+        ItemData weaponData = FindItemData(weaponID);
+
+        // 3. TIẾN HÀNH LẮP RÁP
+        if (hullData != null && hullData.hullPrefab != null)
         {
-            data = ShopManager.Instance.GetTankByID(tankId);
-        }
+            // --- A. TẠO THÂN XE (HULL) ---
+            GameObject playerTank = Instantiate(hullData.hullPrefab, spawnPoint.position, spawnPoint.rotation);
+            playerTank.name = "PlayerTank";
 
-        // 3. Nếu tìm thấy dữ liệu -> Sinh ra xe
-        if (data != null && data.tankPrefab != null)
-        {
-            // Sinh ra xe tại vị trí StartPoint
-            GameObject player = Instantiate(data.tankPrefab, spawnPoint.position, spawnPoint.rotation);
+            // Nạp chỉ số thân xe (Máu, Tốc độ...)
+            var tankCtrl = playerTank.GetComponent<TankController>();
+            if (tankCtrl != null) tankCtrl.SetupTank(hullData);
 
-            // Đặt lại tên cho dễ quản lý (để các script khác tìm thấy)
-            player.name = "PlayerTank";
+            // --- B. TÌM KHỚP GẮN SÚNG (GunMount) ---
+            // Tìm object con có tên chính xác là "GunMount"
+            Transform gunMount = playerTank.transform.Find("GunMount");
 
-            Debug.Log($"Đã sinh ra xe: {data.tankName} (ID: {tankId})");
-
-            // Lấy script điều khiển của xe mới sinh ra
-            TankController controller = player.GetComponent<TankController>();
-
-            // Nạp dữ liệu vào cho nó
-            if (controller != null)
+            if (gunMount != null && weaponData != null && weaponData.weaponPrefab != null)
             {
-                controller.SetupTank(data);
-                Debug.Log($"Đã nạp chỉ số: HP={data.health}, Speed={data.moveSpeed}");
-            }
-            // 4. (QUAN TRỌNG) Xử lý Camera bám theo
-            // Vì xe cũ xóa rồi, Camera đang bơ vơ. Cần gán nó vào xe mới.
-            if (Camera.main != null)
-            {
+                // --- C. TẠO SÚNG (WEAPON) ---
+                GameObject gun = Instantiate(weaponData.weaponPrefab, gunMount.position, gunMount.rotation);
 
-                // Reset vị trí về giữa (giữ Z = -10 để nhìn thấy)
-                Camera.main.transform.localPosition = new Vector3(0, 0, -10);
+                // QUAN TRỌNG: Gắn súng làm con của GunMount để nó dính liền với xe
+                gun.transform.SetParent(gunMount);
+
+                // Reset vị trí về 0 để súng nằm đúng tâm khớp
+                gun.transform.localPosition = Vector3.zero;
+                gun.transform.localRotation = Quaternion.identity;
+
+                // Nạp chỉ số súng (Sát thương...)
+                var weaponCtrl = gun.GetComponent<WeaponController>();
+                if (weaponCtrl != null) weaponCtrl.SetupWeapon(weaponData);
             }
+            else
+            {
+                if (gunMount == null) Debug.LogError("Lỗi: Không tìm thấy 'GunMount' trong Prefab thân xe!");
+            }
+
+            // --- D. CAMERA FOLLOW ---
+            SetupCamera(playerTank.transform);
         }
         else
         {
-            Debug.LogError("LỖI: Không tìm thấy dữ liệu Tank hoặc chưa kéo Prefab vào TankData!");
+            Debug.LogError($"Lỗi: Không tìm thấy Data Thân xe ({hullID}) hoặc chưa gắn Prefab!");
+        }
+    }
+
+    // Hàm phụ: Tìm Data trong danh sách của InventoryManager
+    ItemData FindItemData(string id)
+    {
+        foreach (var item in InventoryManager.Instance.allGameItems)
+        {
+            if (item.id == id) return item;
+        }
+        return null;
+    }
+
+    // Hàm phụ: Setup Camera
+    void SetupCamera(Transform target)
+    {
+        if (Camera.main != null)
+        {
+            // Cách đơn giản: Di chuyển camera tới xe
+            Camera.main.transform.position = new Vector3(target.position.x, target.position.y, -10);
+
+            // Nếu bạn dùng script CameraFollow riêng, hãy bỏ comment dòng dưới:
+            // var camScript = Camera.main.GetComponent<CameraFollow>();
+            // if (camScript != null) camScript.target = target;
         }
     }
 }

@@ -16,12 +16,14 @@ MonoBehaviour:
   tankName: viptank
   price: 300
   icon: {fileID: 21300000, guid: d6ed605f268a5c04e988fa0c7b353c5f, type: 3}
-  turnSpeed: 80
+  turnSpeed: 200
+  acceleration: 40
+  deceleration: 80
   description: asdsds
   tankPreview: {fileID: 21300000, guid: 48f84de902516f1458cfc9d756438749, type: 3}
   health: 300
-  moveSpeed: 10
-  damage: 80
-  tankPrefab: {fileID: 0}
+  moveSpeed: 40
+  damage: 0
+  tankPrefab: {fileID: 3271235984484350673, guid: 341f5fcf2fe9b904194bd41b7cbc7098, type: 3}
   isUnlocked: 0
   rarityLevel: 1

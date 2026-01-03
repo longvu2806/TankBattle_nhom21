@@ -9,7 +9,6 @@ public class ItemCardUI : MonoBehaviour
     public Image rarityGlow;        // Kéo cái vòng sáng nền (Rarity_Glow) vào
     public Image selectionRing;     // Kéo cái vòng xoay chọn (Selection_Ring) vào
     public TextMeshProUGUI priceText; // Kéo chữ giá tiền vào
-    public GameObject priceBackground; // (Tùy chọn) Kéo cái nền đen dưới giá tiền vào
 
     [Header("--- CÀI ĐẶT MÀU SẮC ---")]
     public Color commonColor = new Color(0.5f, 0.5f, 0.5f, 0.5f);   // Xám
@@ -19,8 +18,8 @@ public class ItemCardUI : MonoBehaviour
 
     // Biến lưu trữ trạng thái
     private bool isSelected = false;
-    private int myIndex; // Để biết mình là thẻ số mấy
-    private ShopController shopController; // Để báo lại cho Shop biết khi bị bấm
+    private int myIndex;
+    private ShopController shopController;
 
     void Start()
     {
@@ -37,39 +36,40 @@ public class ItemCardUI : MonoBehaviour
             // Xoay -150 độ mỗi giây (xoay phải)
             selectionRing.transform.Rotate(0, 0, -150 * Time.deltaTime);
         }
-
-
     }
 
-    // --- HÀM 1: CÀI ĐẶT DỮ LIỆU (Gọi 1 lần khi sinh ra) ---
-    public void Setup(int index, ShopController controller, string name, int price, Sprite icon, int rarity)
+    // --- [ĐÃ SỬA] HÀM 1: CÀI ĐẶT DỮ LIỆU TỪ ITEM DATA ---
+    // Bây giờ nhận vào (int index, ShopController, ItemData)
+    public void Setup(int index, ShopController controller, ItemData data)
     {
         myIndex = index;
         shopController = controller;
 
         // 1. Điền giá và ảnh
-        if (priceText) priceText.text = "$ " + price;
-        if (iconImage) iconImage.sprite = icon;
+        if (priceText) priceText.text = "$ " + data.price;
+        if (iconImage) iconImage.sprite = data.icon;
 
         // 2. Chỉnh màu độ hiếm
-        Color finalColor = commonColor;
-        switch (rarity)
+        // (Ép kiểu Enum Rarity sang số nguyên int để dùng switch cũ của bạn)
+        int rarityIndex = (int)data.rarity;
+
+        Color finalColor = commonColor; // Mặc định là Common (0)
+        switch (rarityIndex)
         {
             case 1: finalColor = rareColor; break;      // Rare
             case 2: finalColor = epicColor; break;      // Epic
-            case 3: finalColor = legendaryColor; break; // Legend
+            case 3: finalColor = legendaryColor; break; // Legendary
         }
+
         if (rarityGlow) rarityGlow.color = finalColor;
 
         // 3. Đặt tên GameObject cho dễ quản lý
-        this.gameObject.name = "Card_" + name;
+        this.gameObject.name = "Card_" + data.itemName;
     }
 
     // --- HÀM 2: XỬ LÝ KHI NGƯỜI CHƠI BẤM VÀO THẺ ---
-    // (Gắn hàm này vào nút Button của thẻ nhé!)
     public void OnClick_SelectCard()
     {
-        // Báo cho Shop biết: "Tôi (thẻ số myIndex) vừa được bấm!"
         if (shopController != null)
         {
             shopController.OnCardSelected(myIndex);
@@ -88,15 +88,11 @@ public class ItemCardUI : MonoBehaviour
         // 2. Hiệu ứng Phóng to / Thu nhỏ
         if (selected)
         {
-            // Phóng to lên 1.1 lần
             transform.localScale = new Vector3(1.1f, 1.1f, 1f);
-
-            // Reset góc xoay vòng ring về 0 cho đẹp
             if (selectionRing != null) selectionRing.transform.rotation = Quaternion.identity;
         }
         else
         {
-            // Trả về kích thước gốc
             transform.localScale = Vector3.one;
         }
     }

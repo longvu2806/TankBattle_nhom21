@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1e09efb0383a9d4ba3235099035a994, type: 3}
+  m_Name: Data_Hull_01
+  m_EditorClassIdentifier: 
+  id: hull_01
+  itemName: "Tank C\u01A1 B\u1EA3n"
+  description: 
+  icon: {fileID: 0}
+  itemType: 0
+  rarity: 0
+  price: 0
+  hullPrefab: {fileID: 6113490298549918146, guid: e4a40320936d1c44fb10c37e1351ecf7, type: 3}
+  weaponPrefab: {fileID: 0}
+  healthBonus: 100
+  moveSpeed: 0
+  turnSpeed: 0
+  acceleration: 0
+  damageBonus: 0
+  fireRate: 0

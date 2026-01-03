@@ -2,35 +2,51 @@ using UnityEngine;
 
 public class Bullet : MonoBehaviour
 {
-    public float speed = 10f;
-    public int damage = 10;     // Sát thương của đạn
-    public float lifeTime = 2f;
+    [Header("Chỉ số đạn")]
+    public float speed = 15f;    // Tăng tốc lên chút cho sướng tay
+    public int damage = 10;      // Sát thương
+    public float lifeTime = 2f;  // Thời gian sống
+
+    [Header("Hiệu ứng (Optional)")]
+    public GameObject hitEffect; // Kéo Prefab vụ nổ vào đây (nếu có)
 
     void Start()
     {
-        Destroy(gameObject, lifeTime); // Tự hủy nếu bắn trượt
+        // Tự hủy sau 2 giây nếu không bắn trúng ai
+        Destroy(gameObject, lifeTime);
     }
 
     void Update()
     {
+        // Di chuyển đạn
+        // Lưu ý: Dùng Vector2.up là chuẩn nếu Sprite đạn của bạn hướng đầu lên trên
         transform.Translate(Vector2.up * speed * Time.deltaTime);
     }
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        // 1. Nếu đạn trúng vật thể có gắn thẻ "Player", bỏ qua (để không tự bắn mình)
+        // 1. QUAN TRỌNG: Né chính người bắn (Player)
         if (other.CompareTag("Player")) return;
 
-        // 2. Kiểm tra xem vật thể bị bắn trúng có máu (EnemyHealth) không?
-        BaseTank tank = other.GetComponent<BaseTank>();
+        // 2. [MỚI] Né các vùng Trigger khác (Ví dụ: Checkpoint, Item ăn tiền...)
+        // Nếu cái kia cũng là Trigger thì đạn bay xuyên qua, không nổ
+        if (other.isTrigger) return;
 
+        // 3. Xử lý gây sát thương
+        // Tìm xem vật bị bắn có script BaseTank (hoặc con của nó) không
+        BaseTank tank = other.GetComponent<BaseTank>();
         if (tank != null)
         {
-            // Gọi hàm trừ máu bên script EnemyHealth
             tank.TakeDamage(damage);
         }
 
-        // 3. Hủy viên đạn (dù trúng tường hay trúng địch đều mất đạn)
+        // 4. [MỚI] Tạo hiệu ứng nổ (Nếu có)
+        if (hitEffect != null)
+        {
+            Instantiate(hitEffect, transform.position, Quaternion.identity);
+        }
+
+        // 5. Hủy viên đạn
         Destroy(gameObject);
     }
 }

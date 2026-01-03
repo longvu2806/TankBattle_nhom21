@@ -9,6 +9,8 @@ public class TankData : ScriptableObject
     public int price;
     public Sprite icon;         // B dùng tên là icon (Tôi dùng tankIcon) -> Ta sẽ theo B
     public float turnSpeed;
+    public float acceleration;   // Gia tốc (Độ vọt)
+    public float deceleration;   // Hãm tốc (Độ phanh/trượt)
 
     [Header("UI Cần thêm (Của A)")]
     [TextArea] public string description; // Cốt truyện (B chưa có -> Thêm vào)
@@ -17,7 +19,7 @@ public class TankData : ScriptableObject
     [Header("Thông số kỹ thuật")]
     public int health;          // B dùng int (Tôi dùng float) -> Theo B
     public float moveSpeed;     // B dùng moveSpeed (Tôi dùng speed) -> Theo B
-    [Range(0, 100)] public float damage; // Sát thương (B chưa có -> Thêm vào)
+    [Range(0, 100)] public int damage; // Sát thương (B chưa có -> Thêm vào)
 
     public GameObject tankPrefab;
     public bool isUnlocked;

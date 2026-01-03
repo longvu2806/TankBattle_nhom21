@@ -17,6 +17,8 @@ MonoBehaviour:
   price: 0
   icon: {fileID: 21300000, guid: d6ed605f268a5c04e988fa0c7b353c5f, type: 3}
   turnSpeed: 300
+  acceleration: 40
+  deceleration: 80
   description: asdas
   tankPreview: {fileID: 21300000, guid: 20064068a32b82643a863e5d76f51219, type: 3}
   health: 50
