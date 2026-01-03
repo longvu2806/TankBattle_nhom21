@@ -122,6 +122,53 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &188830865
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 188830867}
+  - component: {fileID: 188830866}
+  m_Layer: 0
+  m_Name: AdminManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &188830866
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 188830865}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1434c285a7878de40b068360ba1fd994, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inputName: {fileID: 0}
+  inputPrice: {fileID: 0}
+  txtNotification: {fileID: 0}
+--- !u!4 &188830867
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 188830865}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.5008968, y: 0.30717272, z: 0.0013904737}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &196333677
 GameObject:
   m_ObjectHideFlags: 0
@@ -923,6 +970,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95e0f03963c59db44b9ea54ef0019b57, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerData:
+    gold: 1000
+    diamonds: 0
+    ownedTankIDs: 00000000
+    currentEquippedID: 0
   IsGameOver: 0
   enemyCount: 0
   score: 0
@@ -1501,9 +1553,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4940033654e125643a896bb8feead3db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentCoin: 1000
-  ownedTankIds: 01000000
-  equippedTankId: 0
 --- !u!4 &1793457665
 Transform:
   m_ObjectHideFlags: 0
@@ -1893,3 +1942,4 @@ SceneRoots:
   - {fileID: 1914476756}
   - {fileID: 1002222580}
   - {fileID: 1509936527}
+  - {fileID: 188830867}
